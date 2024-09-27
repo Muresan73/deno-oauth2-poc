@@ -26,14 +26,21 @@ export const handler: Handlers = {
     console.log(tokens);
 
     const userInfo = await getUserEmailFromAzure(tokens.accessToken);
-    const refreshToken = tokens.refreshToken;
+    // This is necessary because the generated token is too long
+    // the added code neeed to be compressed
+    const refreshToken = "0" || tokens.refreshToken;
+    console.log(userInfo);
 
     const sessionToken = await createJWTsesstion({
+      user: userInfo!.displayName,
       refresh_token: refreshToken,
       access_token: tokens.accessToken,
       expires_at: tokens.expiresIn,
     });
 
+    console.log("length ", sessionToken.length);
+
+    // Set the JWT token as a cookie
     setCookie(headers, {
       name: "my.session",
       value: sessionToken,
@@ -44,13 +51,15 @@ export const handler: Handlers = {
       maxAge: 3600, // 1 hour
     });
 
-    // headers.set("Location", "/greeting");
     console.log("jwt included", headers);
 
     ctx.state.user = userInfo;
     return new Response(null, {
-      status: 303,
-      headers,
+      status: 302,
+      headers: {
+        Location: "/greeting",
+        "Set-Cookie": `token=${sessionToken}; HttpOnly; Path=/; Max-Age=3600; Secure; SameSite=Lax`,
+      },
     });
   },
 };
