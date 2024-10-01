@@ -8,6 +8,7 @@ import { FreshContext } from "$fresh/server.ts";
 const clientId = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_ID")!;
 const clientSecret = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_SECRET");
 const tenantId = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_TENANT_ID");
+const scope = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_SCOPE");
 const redirectUri =
   "http://localhost:3000/api/auth/callback/microsoft-entra-id";
 

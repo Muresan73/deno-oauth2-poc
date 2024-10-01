@@ -22,23 +22,19 @@ export const handler: Handlers = {
       throw new Error("Unable to get tokens");
     }
 
-    console.log("\n Tokens \n");
-    console.log(tokens);
-
     const userInfo = await getUserEmailFromAzure(tokens.accessToken);
     // This is necessary because the generated token is too long
     // the added code neeed to be compressed
-    const refreshToken = "0" || tokens.refreshToken;
-    console.log(userInfo);
+    const refreshToken = tokens.refreshToken;
+    console.log("azure response ", userInfo);
 
     const sessionToken = await createJWTsesstion({
-      user: userInfo!.displayName,
       refresh_token: refreshToken,
       access_token: tokens.accessToken,
-      expires_at: tokens.expiresIn,
-    });
+    } as any);
 
-    console.log("length ", sessionToken.length);
+    if (sessionToken.length > 4096)
+      throw new Error("Token too long: " + sessionToken.length);
 
     // Set the JWT token as a cookie
     setCookie(headers, {
@@ -51,9 +47,6 @@ export const handler: Handlers = {
       maxAge: 3600, // 1 hour
     });
 
-    console.log("jwt included", headers);
-
-    ctx.state.user = userInfo;
     return new Response(null, {
       status: 302,
       headers: {

@@ -1,15 +1,5 @@
-import { create, verify } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
+import * as jose from "https://deno.land/x/jose@v5.9.3/index.ts";
 
-const KEY = await crypto.subtle.generateKey(
-  {
-    name: "RSASSA-PKCS1-v1_5",
-    modulusLength: 1024,
-    publicExponent: new Uint8Array([1, 0, 1]),
-    hash: "SHA-256",
-  },
-  true,
-  ["sign", "verify"],
-);
 export type JWTSession = {
   user: string;
   refresh_token?: string;
@@ -17,12 +7,27 @@ export type JWTSession = {
   expires_at?: number;
 };
 
+const { publicKey, privateKey } = await jose.generateKeyPair("RSA-OAEP-256");
+
 export async function createJWTsesstion(data: JWTSession) {
-  return await create({ alg: "RS256", typ: "JWT" }, data, KEY.privateKey);
+  console.log("\n ==== Data", data);
+
+  return await new jose.EncryptJWT(data)
+    .setProtectedHeader({ alg: "RSA-OAEP-256", enc: "A256GCM" })
+    .setIssuedAt()
+    .setIssuer("urn:despono:deno")
+    .setAudience(["urn:despono:deno", "urn:desepono:dotnet"])
+    .setExpirationTime("2h")
+    .encrypt(publicKey);
 }
 
 export async function verifyJWTsession(jwt: string): Promise<JWTSession> {
-  console.log("happy");
+  const { payload, protectedHeader } = await jose.jwtDecrypt(jwt, privateKey, {
+    issuer: "urn:despono:deno",
+    audience: "urn:despono:deno",
+  });
+  console.log(protectedHeader);
+  console.log("pl ", payload);
 
-  return await verify(jwt, KEY.publicKey);
+  return payload as JWTSession;
 }

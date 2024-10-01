@@ -13,6 +13,8 @@ import * as $api_auth_callback_microsoft_entra_id from "./routes/api/auth/callba
 import * as $index from "./routes/index.tsx";
 import * as $login from "./routes/login.tsx";
 import * as $protected from "./routes/protected.tsx";
+import * as $test_data from "./routes/test/data.tsx";
+import * as $test_jwt from "./routes/test/jwt.tsx";
 import * as $Counter from "./islands/Counter.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -30,6 +32,8 @@ const manifest = {
     "./routes/index.tsx": $index,
     "./routes/login.tsx": $login,
     "./routes/protected.tsx": $protected,
+    "./routes/test/data.tsx": $test_data,
+    "./routes/test/jwt.tsx": $test_jwt,
   },
   islands: {
     "./islands/Counter.tsx": $Counter,
