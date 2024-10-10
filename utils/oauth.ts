@@ -9,16 +9,8 @@ const clientId = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_ID")!;
 const clientSecret = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_SECRET");
 const tenantId = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_TENANT_ID");
 const scope = Deno.env.get("AUTH_MICROSOFT_ENTRA_ID_SCOPE");
-const redirectUri =
-  "http://localhost:3000/api/auth/callback/microsoft-entra-id";
-
-export const Oauth2Config: OAuth2ClientConfig = {
-  clientId,
-  clientSecret,
-  authorizationEndpointUri: `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize`,
-  tokenUri: `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
-  redirectUri,
-};
+const redirectUri = "http://localhost:3000/auth/callback";
+// in case of nextauth its "http://localhost:3000/api/auth/callback/microsoft-entra-id";
 
 export const client = new OAuth2Client({
   clientId,
@@ -48,10 +40,13 @@ export function setVerifier(codeVerifier: string) {
   return headers;
 }
 
-export function getVerifier(req: Request, headers: Headers) {
+export function getVerifier(req: Request) {
   const codeVerifier = getCookies(req.headers)[COOKIE_NAME];
-  // deleteCookie(headers, COOKIE_NAME);
   return codeVerifier;
+}
+
+export function deleteVerifier(headers: Headers) {
+  deleteCookie(headers, COOKIE_NAME);
 }
 
 export async function getRefreshToken(ctx: FreshContext) {
